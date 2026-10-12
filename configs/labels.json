@@ -1,0 +1,9 @@
+{
+  "labels": ["palm", "peace", "thumbs_up", "fist"],
+  "display_names_zh": {
+    "palm": "张开手掌",
+    "peace": "剪刀手",
+    "thumbs_up": "点赞",
+    "fist": "握拳"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "palm": {
+    "action": "play_pause",
+    "key": "space",
+    "description": "播放或暂停视频"
+  },
+  "peace": {
+    "action": "next",
+    "key": "right",
+    "description": "下一张幻灯片或快进"
+  },
+  "thumbs_up": {
+    "action": "previous",
+    "key": "left",
+    "description": "上一张幻灯片或快退"
+  },
+  "fist": {
+    "action": "mute",
+    "key": "m",
+    "description": "切换静音"
+  }
+}

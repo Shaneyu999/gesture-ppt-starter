@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gesture-ppt-starter"
+version = "0.1.0"
+description = "Real-time hand-gesture recognition for PowerPoint and video control."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Your Name" }]
+dependencies = [
+  "torch>=2.1",
+  "torchvision>=0.16",
+  "opencv-python>=4.9",
+  "pillow>=10.0",
+  "numpy>=1.24",
+  "pyautogui>=0.9",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
+[project.scripts]
+gesture-ppt = "gesture_ppt.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
