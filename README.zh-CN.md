@@ -25,7 +25,6 @@
 - 手势到按键的映射可以修改；
 - 默认预览模式，避免误操作；
 - 包含合成数据脚本，没有摄像头也能检查训练流程；
-- 包含项目介绍、基础知识和演示指南。
 
 ## 项目结构
 
@@ -42,10 +41,6 @@ gesture-ppt-starter/
 │   └── gestures/
 │       ├── train/
 │       └── val/
-├── docs/
-│   ├── 01_project_introduction.md
-│   ├── 02_basics.md
-│   └── 04_demo_guide.md
 ├── scripts/
 │   ├── check_camera.py
 │   └── make_smoke_data.py
@@ -62,8 +57,6 @@ gesture-ppt-starter/
 │   └── train.py
 └── tests/
 ```
-
-文档以英文版为主，中文版本使用 .zh-CN.md 后缀。
 
 ## 环境要求
 
@@ -169,7 +162,6 @@ gesture-ppt train `
   --device cpu
 ```
 
-这些图片只用于检查代码，不表示真实手势识别效果。
 
 ### 5. 训练真实手势模型
 
@@ -213,9 +205,9 @@ gesture-ppt predict `
   --device cpu
 ```
 
-### 7. 实时预览，不实际控制
+### 7. 摄像头指令收集
 
-先把摄像头窗口和手势模型跑起来：
+仅加载手势模型并调用摄像头窗口：
 
 ```powershell
 gesture-ppt run `
@@ -229,7 +221,7 @@ gesture-ppt run `
   --cooldown 1.5
 ```
 
-屏幕上会显示：
+输出结果如下：
 
 ```text
 Gesture: peace 0.91
@@ -385,15 +377,6 @@ python -m unittest discover -s tests -v
 - 仅通过键盘控制，不直接调用 PowerPoint API；
 - 训练数据来自摄像头，模型容易受到背景和光照影响；
 - 合成图片只能用于流程测试，不能用于效果评价。
-
-## 下一步扩展
-
-1. 加入更多手势，例如 OK、数字手势、左右挥手；
-2. 使用 MediaPipe 手部关键点提升旋转和遮挡鲁棒性；
-3. 增加实时手部检测框；
-4. 加入手势序列，例如“先握拳再点赞”；
-5. 使用 ONNX Runtime 加速部署；
-6. 加入演示视频和 Gradio/Streamlit 控制面板。
 
 ## 许可证
 

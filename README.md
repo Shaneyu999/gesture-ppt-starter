@@ -43,10 +43,6 @@ gesture-ppt-starter/
 │   └── gestures/
 │       ├── train/
 │       └── val/
-├── docs/
-│   ├── 01_project_introduction.md
-│   ├── 02_basics.md
-│   └── 04_demo_guide.md
 ├── scripts/
 │   ├── check_camera.py
 │   └── make_smoke_data.py
@@ -64,7 +60,6 @@ gesture-ppt-starter/
 └── tests/
 ```
 
-The English documents are the primary versions. Chinese copies use the .zh-CN.md suffix.
 
 ## Requirements
 
@@ -172,7 +167,6 @@ gesture-ppt train `
   --device cpu
 ```
 
-The synthetic images only verify the software pipeline. They are not suitable for reporting real gesture-recognition accuracy.
 
 ### 5. Train a real gesture model
 
@@ -216,7 +210,9 @@ gesture-ppt predict `
   --device cpu
 ```
 
-### 7. Run the real-time preview without keyboard control
+### 7. Camera-based command collection
+
+Load only the gesture model and open the camera window:
 
 ```powershell
 gesture-ppt run `
@@ -230,7 +226,7 @@ gesture-ppt run `
   --cooldown 1.5
 ```
 
-The preview shows:
+The output is as follows:
 
 ```text
 Gesture: peace 0.91
@@ -380,15 +376,6 @@ Use Python 3.11 or 3.12 to create the virtual environment. Some of the latest Py
 - Control uses keyboard events and does not call the PowerPoint API directly;
 - Training data comes from the camera, so the model can be sensitive to background and lighting;
 - The synthetic images are only for pipeline testing and cannot be used to evaluate real performance.
-
-## Next steps
-
-1. Add more gestures, such as OK, number gestures, or waving;
-2. Use MediaPipe hand landmarks to improve rotation and occlusion robustness;
-3. Add real-time hand detection boxes;
-4. Support gesture sequences, such as fist followed by thumbs-up;
-5. Use ONNX Runtime for faster deployment;
-6. Add a demo video and a Gradio or Streamlit control panel.
 
 ## License
 
