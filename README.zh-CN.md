@@ -25,7 +25,7 @@
 - 手势到按键的映射可以修改；
 - 默认预览模式，避免误操作；
 - 包含合成数据脚本，没有摄像头也能检查训练流程；
-- 包含项目介绍、基础知识、Demo 教程和 GitHub 教程。
+- 包含项目介绍、基础知识和演示指南。
 
 ## 项目结构
 
@@ -45,7 +45,6 @@ gesture-ppt-starter/
 ├── docs/
 │   ├── 01_project_introduction.md
 │   ├── 02_basics.md
-│   ├── 03_github_guide.md
 │   └── 04_demo_guide.md
 ├── scripts/
 │   ├── check_camera.py
@@ -78,7 +77,8 @@ gesture-ppt-starter/
 ### 1. 创建虚拟环境
 
 ```powershell
-cd C:\Users\Shane\Documents\Codex\2026-09-24\new-chat\outputs\gesture-ppt-starter
+git clone https://github.com/Shaneyu999/gesture-ppt-starter.git
+cd gesture-ppt-starter
 
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1

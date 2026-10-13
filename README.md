@@ -46,7 +46,6 @@ gesture-ppt-starter/
 ├── docs/
 │   ├── 01_project_introduction.md
 │   ├── 02_basics.md
-│   ├── 03_github_guide.md
 │   └── 04_demo_guide.md
 ├── scripts/
 │   ├── check_camera.py
@@ -79,7 +78,8 @@ gesture-ppt-starter/
 ### 1. Create a virtual environment
 
 ```powershell
-cd C:\Users\Shane\Documents\Codex\2026-09-24\new-chat\outputs\gesture-ppt-starter
+git clone https://github.com/Shaneyu999/gesture-ppt-starter.git
+cd gesture-ppt-starter
 
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1

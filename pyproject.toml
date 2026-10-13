@@ -9,7 +9,7 @@ description = "Real-time hand-gesture recognition for PowerPoint and video contr
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
-authors = [{ name = "Your Name" }]
+authors = [{ name = "Shaneyu999" }]
 dependencies = [
   "torch>=2.1",
   "torchvision>=0.16",
