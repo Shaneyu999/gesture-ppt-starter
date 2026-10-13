@@ -1,35 +1,38 @@
 # Gesture PPT Starter
 
-一个 **实时手势识别 + PPT/视频控制** Python 项目。
+[English](README.md) | [简体中文](README.zh-CN.md)
 
-通过普通摄像头识别四种手势，并将手势转换为播放器或演示文稿的键盘操作：
+A **real-time hand gesture recognition and PPT/video control** project in Python.
 
-| 手势 | 默认操作 | 按键 |
+It uses a normal webcam to recognize four hand gestures and convert them into keyboard actions for a presentation or media player:
+
+| Gesture | Default action | Key |
 | --- | --- | --- |
-| 张开手掌 | 播放/暂停 | `space` |
-| 剪刀手 | 下一张/快进 | `right` |
-| 点赞 | 上一张/快退 | `left` |
-| 握拳 | 静音/取消静音 | `m` |
+| Open palm | Play or pause | `space` |
+| Peace sign | Next slide or forward | `right` |
+| Thumbs-up | Previous slide or rewind | `left` |
+| Fist | Mute or unmute | `m` |
 
-> 安全默认：程序默认只预览识别结果，不发送键盘按键。只有显式添加 `--enable-controls` 才会实际控制当前窗口。
+> Safety default: the program only previews predictions by default. It sends keyboard input only when `--enable-controls` is explicitly provided.
 
-## 项目特点
+## Features
 
-- 使用普通 USB 摄像头或笔记本摄像头；
-- 使用 MobileNetV3-Small，小型、训练速度快；
-- 支持摄像头批量采集训练图片；
-- 支持训练、单图预测和实时摄像头推理；
-- 使用连续帧和冷却时间减少误触发；
-- 手势到按键的映射可以修改；
-- 默认预览模式，避免误操作；
-- 包含合成数据脚本，没有摄像头也能检查训练流程；
-- 包含项目介绍、基础知识、Demo 教程和 GitHub 教程。
+- Works with a normal USB or laptop webcam;
+- Uses MobileNetV3-Small for lightweight gesture classification;
+- Supports webcam data collection and custom training;
+- Supports single-image prediction and real-time webcam inference;
+- Uses confidence thresholds, stable frames, and cooldown periods to reduce false triggers;
+- Allows gesture-to-key mappings to be edited in a JSON file;
+- Runs in preview-only mode by default;
+- Includes a synthetic data generator for checking the training pipeline without a camera;
+- Includes unit tests and a GitHub Actions workflow.
 
-## 项目结构
+## Project structure
 
 ```text
 gesture-ppt-starter/
 ├── README.md
+├── README.zh-CN.md
 ├── pyproject.toml
 ├── requirements.txt
 ├── configs/
@@ -62,18 +65,18 @@ gesture-ppt-starter/
 └── tests/
 ```
 
-## 环境要求
+## Requirements
 
-- Python 3.10 或更高版本；
-- 推荐 Python 3.11 或 3.12，OpenCV 兼容性通常更好；
-- 普通 USB 摄像头或笔记本摄像头；
-- 训练：CPU 可以完成小数据集训练，GPU 更快；
-- 控制功能：Windows、macOS 或 Linux 桌面环境；
-- 实际控制时，目标 PPT 或视频播放器必须处于前台。
+- Python 3.10 or later;
+- Python 3.11 or 3.12 is recommended for better OpenCV compatibility;
+- A USB webcam or laptop camera;
+- CPU training is sufficient for a small dataset, while a GPU is faster;
+- A desktop environment for real-time camera and keyboard control;
+- The target presentation or media player must be available as a foreground or focusable window.
 
-## 快速开始
+## Quick start
 
-### 1. 创建虚拟环境
+### 1. Create a virtual environment
 
 ```powershell
 cd C:\Users\Shane\Documents\Codex\2026-09-24\new-chat\outputs\gesture-ppt-starter
@@ -84,30 +87,30 @@ python -m pip install --upgrade pip
 pip install -e .
 ```
 
-如果不想每次激活虚拟环境，可以直接使用：
+If you do not want to activate the environment, use the virtual environment Python directly:
 
 ```powershell
 .\.venv\Scripts\python.exe -m gesture_ppt.cli --help
 ```
 
-### 2. 检查摄像头
+### 2. Check the camera
 
 ```powershell
 gesture-ppt --help
 python scripts\check_camera.py --camera 0
 ```
 
-窗口出现后，按 `Q` 或 `Esc` 退出。
+Press `Q` or `Esc` to close the preview.
 
-如果打不开摄像头，可以尝试：
+If camera index 0 does not work, try:
 
 ```powershell
 python scripts\check_camera.py --camera 1
 ```
 
-### 3. 采集训练图片
+### 3. Collect training images
 
-先采集“张开手掌”。运行后按空格开始或暂停，按 Q 退出：
+Start with the open palm gesture. Press Space to start or pause capture, and press Q to exit:
 
 ```powershell
 gesture-ppt capture `
@@ -118,7 +121,7 @@ gesture-ppt capture `
   --interval 3
 ```
 
-依次采集四类手势：
+Collect all four gestures:
 
 ```powershell
 gesture-ppt capture --output data\gestures\train --label palm --session desk-01
@@ -127,15 +130,15 @@ gesture-ppt capture --output data\gestures\train --label thumbs_up --session des
 gesture-ppt capture --output data\gestures\train --label fist --session desk-01
 ```
 
-建议每类至少采集 100～300 张，并改变：
+Aim for at least 100 to 300 images per gesture. Vary:
 
-- 手的距离和角度；
-- 背景和光照；
-- 左手和右手；
-- 摄像头位置；
-- 不同人员。
+- Hand distance and angle;
+- Background and lighting;
+- Left and right hands;
+- Camera position;
+- Different participants when possible.
 
-验证集要使用另一个 session，最好也改变背景和光照：
+Collect validation data in a separate session:
 
 ```powershell
 gesture-ppt capture --output data\gestures\val --label palm --session evening-01 --count 40
@@ -144,15 +147,17 @@ gesture-ppt capture --output data\gestures\val --label thumbs_up --session eveni
 gesture-ppt capture --output data\gestures\val --label fist --session evening-01 --count 40
 ```
 
-### 4. 没有摄像头时检查流程
+Do not randomly split consecutive frames from one recording between training and validation. Keep each session separate to avoid data leakage.
 
-生成合成手势图：
+### 4. Test the pipeline without a camera
+
+Generate synthetic gesture images:
 
 ```powershell
 python scripts\make_smoke_data.py --output data\smoke
 ```
 
-用合成图训练一个很小模型：
+Train a small test model:
 
 ```powershell
 gesture-ppt train `
@@ -165,9 +170,9 @@ gesture-ppt train `
   --device cpu
 ```
 
-这些图片只用于检查代码，不表示真实手势识别效果。
+The synthetic images only verify the software pipeline. They are not suitable for reporting real gesture-recognition accuracy.
 
-### 5. 训练真实手势模型
+### 5. Train a real gesture model
 
 ```powershell
 gesture-ppt train `
@@ -181,7 +186,7 @@ gesture-ppt train `
   --device cpu
 ```
 
-有 NVIDIA GPU 时：
+With an NVIDIA GPU:
 
 ```powershell
 gesture-ppt train `
@@ -193,14 +198,14 @@ gesture-ppt train `
   --device cuda
 ```
 
-训练完成后得到：
+The training outputs are:
 
 ```text
 runs/gesture_model/best.pt
 runs/gesture_model/metrics.json
 ```
 
-### 6. 单图预测
+### 6. Predict a single image
 
 ```powershell
 gesture-ppt predict `
@@ -209,9 +214,7 @@ gesture-ppt predict `
   --device cpu
 ```
 
-### 7. 实时预览，不实际控制
-
-先把摄像头窗口和手势模型跑起来：
+### 7. Run the real-time preview without keyboard control
 
 ```powershell
 gesture-ppt run `
@@ -225,7 +228,7 @@ gesture-ppt run `
   --cooldown 1.5
 ```
 
-屏幕上会显示：
+The preview shows:
 
 ```text
 Gesture: peace 0.91
@@ -235,11 +238,11 @@ Stable: 5
 FPS: 24.5
 ```
 
-此模式不会发送任何按键。
+No keyboard input is sent in this mode.
 
-### 8. 实际控制 PPT 或视频
+### 8. Control PowerPoint or video playback
 
-确认预览识别稳定后，再加上：
+After the preview is stable, enable keyboard control:
 
 ```powershell
 gesture-ppt run `
@@ -251,60 +254,54 @@ gesture-ppt run `
   --enable-controls
 ```
 
-`--window-title` 是可选的。如果填写，程序发送按键前会先尝试激活匹配的窗口，这样摄像头预览不需要一直占用前台。窗口标题可以通过任务栏或 `pyautogui` 的窗口列表确认。
+The optional `--window-title` argument attempts to focus a matching window before sending a key. If it is omitted, keep the target PowerPoint or media player focused manually.
 
-使用步骤：
+Recommended workflow:
 
-1. 启动 PPT 放映或打开视频；
-2. 再运行带 `--enable-controls` 的命令；
-3. 保持 PPT 或播放器处于前台；
-4. 把手放在摄像头画面中央区域；
-5. 保持同一手势约 5 帧；
-6. 需要停止时切回摄像头窗口，按 `Q`。
+1. Start the PowerPoint slideshow or open the video;
+2. Start the command with `--enable-controls`;
+3. Keep the target player available in the foreground or use a second display;
+4. Place your hand in the center region of the camera view;
+5. Hold the gesture for several frames;
+6. Switch back to the camera preview and press `Q` to stop the program.
 
-如果 PPT 需要前台，而摄像头预览也要显示，建议：
+## Configure gestures and keys
 
-- 使用双屏，把预览放在第二屏；
-- 或者先测试动作，再切回 PPT；
-- 或者在 `configs/actions.json` 中改成你需要的按键。
-
-## 修改手势和按键
-
-标签文件：
+Gesture labels are defined in:
 
 ```text
 configs/labels.json
 ```
 
-按键映射文件：
+Keyboard mappings are defined in:
 
 ```text
 configs/actions.json
 ```
 
-例如，把剪刀手改成 PageDown：
+For example, to map the peace sign to PageDown:
 
 ```json
 {
   "peace": {
     "action": "next",
     "key": "pagedown",
-    "description": "下一张幻灯片"
+    "description": "Next slide"
   }
 }
 ```
 
-修改标签后，需要重新采集对应数据并重新训练。
+Changing the labels requires collecting new data and retraining the model.
 
-## 防误触机制
+## False-trigger prevention
 
-程序不会识别到一次手势就立刻按键，而是要求：
+The system does not send a key from a single prediction. It requires all of the following:
 
-1. 置信度大于 `--min-confidence`；
-2. 同一个手势连续出现 `--stable-frames` 次；
-3. 距离上一次相同手势动作超过 `--cooldown` 秒。
+1. Confidence above `--min-confidence`;
+2. The same gesture for `--stable-frames` consecutive frames;
+3. At least `--cooldown` seconds since the previous action of the same type.
 
-建议初始值：
+Recommended starting values:
 
 ```text
 --min-confidence 0.60
@@ -312,17 +309,17 @@ configs/actions.json
 --cooldown 1.5
 ```
 
-如果误触发较多：
+If false triggers occur frequently:
 
-- 提高 `--min-confidence`；
-- 增加 `--stable-frames`；
-- 增加 `--cooldown`；
-- 增加背景变化和困难样本；
-- 重新训练模型。
+- Increase `--min-confidence`;
+- Increase `--stable-frames`;
+- Increase `--cooldown`;
+- Add more background and difficult training samples;
+- Retrain the classifier.
 
-## 运行逻辑测试
+## Test the action logic
 
-不需要摄像头即可检查稳定触发和动作映射：
+The action mapping can be tested without a camera:
 
 ```powershell
 gesture-ppt simulate `
@@ -331,66 +328,66 @@ gesture-ppt simulate `
   --cooldown 0.5
 ```
 
-这个命令默认也只输出预览结果。
+This command only previews actions unless `--enable-controls` is explicitly supplied.
 
-## 运行测试
+## Run the tests
 
 ```powershell
 $env:PYTHONPATH = "src"
 python -m unittest discover -s tests -v
 ```
 
-## 常见问题
+## Troubleshooting
 
-### 找不到摄像头
+### Camera not found
 
-- 关闭占用摄像头的会议软件；
-- 尝试 `--camera 1`；
-- 检查系统摄像头权限。
+- Close applications that may be using the camera;
+- Try `--camera 1`;
+- Check camera permissions in the operating system.
 
-### OpenCV 安装失败
+### OpenCV installation failed
 
-建议使用 Python 3.11 或 3.12 创建虚拟环境。部分最新的 Python 小版本可能暂时没有 OpenCV 预编译包。
+Use Python 3.11 or 3.12 to create the virtual environment. Some of the latest Python versions may not have matching OpenCV wheels yet.
 
-### 控制功能没有反应
+### Keyboard control does not work
 
-- 是否添加了 `--enable-controls`；
-- PPT 或播放器是否处于前台；
-- 按键是否被目标程序识别；
-- 在 `configs/actions.json` 中检查按键名。
+- Confirm that `--enable-controls` is present;
+- Confirm that PowerPoint or the media player is in the foreground, or use `--window-title`;
+- Check whether the target application recognizes the configured key;
+- Check the key names in `configs/actions.json`.
 
-### 识别总跟着背景变化
+### Predictions follow the background
 
-- 增加不同背景数据；
-- 让手占据画面中央更大区域；
-- 调整 `--roi`；
-- 避免训练集中某一手势总是出现在固定背景。
+- Collect more background variation;
+- Keep the hand larger in the center region;
+- Adjust `--roi`;
+- Avoid training data where one gesture always appears against the same background.
 
-## 隐私和安全
+## Privacy and safety
 
-- 本项目只识别手势，不存储身份信息；
-- 摄像头图片可能包含人物和背景，不要上传到公开仓库；
-- `data/gestures/`、`runs/` 和模型权重默认已被 `.gitignore` 排除；
-- 实际键盘控制可能影响当前窗口，请先使用预览模式测试；
-- 不要让程序在没有人工监督的情况下控制重要系统。
+- The project recognizes gestures and does not store identity information;
+- Camera images may contain people and private backgrounds, so do not upload them to a public repository;
+- `data/gestures/`, `runs/`, and model checkpoints are excluded by `.gitignore`;
+- Keyboard control can affect the active window, so test in preview mode first;
+- Do not let the program control important applications without supervision.
 
-## 当前限制
+## Current limitations
 
-- 只支持四种固定手势；
-- 对快速移动、遮挡和强逆光可能不稳定；
-- 仅通过键盘控制，不直接调用 PowerPoint API；
-- 训练数据来自摄像头，模型容易受到背景和光照影响；
-- 合成图片只能用于流程测试，不能用于效果评价。
+- Only four fixed static gestures are supported;
+- Recognition may degrade with fast movement, occlusion, or strong backlighting;
+- Control uses keyboard events and does not call the PowerPoint API directly;
+- Training data comes from the camera, so the model can be sensitive to background and lighting;
+- The synthetic images are only for pipeline testing and cannot be used to evaluate real performance.
 
-## 下一步扩展
+## Next steps
 
-1. 加入更多手势，例如 OK、数字手势、左右挥手；
-2. 使用 MediaPipe 手部关键点提升旋转和遮挡鲁棒性；
-3. 增加实时手部检测框；
-4. 加入手势序列，例如“先握拳再点赞”；
-5. 使用 ONNX Runtime 加速部署；
-6. 加入演示视频和 Gradio/Streamlit 控制面板。
+1. Add more gestures, such as OK, number gestures, or waving;
+2. Use MediaPipe hand landmarks to improve rotation and occlusion robustness;
+3. Add real-time hand detection boxes;
+4. Support gesture sequences, such as fist followed by thumbs-up;
+5. Use ONNX Runtime for faster deployment;
+6. Add a demo video and a Gradio or Streamlit control panel.
 
-## 许可证
+## License
 
-代码采用 MIT License。第三方模型、数据集和库分别遵循各自许可证。
+The source code is released under the MIT License. Third-party models, datasets, and libraries follow their respective licenses.
