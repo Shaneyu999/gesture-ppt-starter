@@ -1,292 +1,286 @@
-# 基础知识参考
+# Technical Background
 
-这篇文档帮助没有深度学习基础的读者理解手势识别和实时控制项目。
+This document explains the main concepts behind the gesture recognition and real-time control project.
 
-## 1. 图像分类是什么
+## 1. Image Classification
 
-图像分类输入一张图片，输出一个类别：
+Image classification takes an image as input and returns a class label:
 
-```text
-图片 -> 模型 -> palm / peace / thumbs_up / fist
-```
+~~~text
+Image -> Model -> palm / peace / thumbs_up / fist
+~~~
 
-模型会把图片转换为数字，再计算它属于各个类别的概率。
+The model converts the image into numerical features and estimates the probability of each class.
 
-## 2. 摄像头视频帧
+## 2. Webcam Frames
 
-视频可以看成按时间排列的图片：
+A video is a sequence of images ordered in time:
 
-```text
-第1帧 -> 第2帧 -> 第3帧 -> ...
-```
+~~~text
+Frame 1 -> Frame 2 -> Frame 3 -> ...
+~~~
 
-OpenCV 使用 `VideoCapture` 读取摄像头，每一帧通常是 BGR 顺序的 NumPy 数组。
+OpenCV reads camera frames through VideoCapture. Each frame is normally a NumPy array in BGR order.
 
-本项目只取画面中央区域进行分类，因为手通常放在中央，也可以减少背景干扰。
+The project classifies only the center region because the hand is usually placed there and the surrounding background is less likely to dominate the prediction.
 
-## 3. 为什么先裁剪中央区域
+## 3. Center-Region Cropping
 
-如果直接对整张画面分类，模型可能学习到：
+When the full frame is classified, the model may learn irrelevant patterns such as:
 
-- 桌子；
-- 墙面；
-- 人体；
-- 显示器；
-- 固定光照。
+- Tables;
+- Walls;
+- Human bodies;
+- Monitors;
+- Fixed lighting.
 
-中央裁剪让手占据更大比例，可以提高稳定性。参数 `--roi 0.65` 表示取画面短边的 65%。
+Center cropping increases the relative area of the hand and improves stability. The option --roi 0.65 means that the crop size is 65 percent of the shorter image dimension.
 
-## 4. 张量
+## 4. Tensors
 
-PyTorch 图像分类常见输入形状：
+A common PyTorch image input shape is:
 
-```text
+~~~text
 [N, C, H, W]
-```
+~~~
 
-- N：batch size；
-- C：RGB 通道数，通常为 3；
-- H：高度；
-- W：宽度。
+- N: batch size;
+- C: number of color channels, normally 3 for RGB;
+- H: height;
+- W: width.
 
-模型实际输入通常是 224 × 224。
+The model input is normally resized to 224 by 224 pixels.
 
-## 5. 训练集和验证集
+## 5. Training, Validation, and Test Sets
 
-- 训练集：更新模型参数；
-- 验证集：选择最佳模型；
-- 测试集：最终只评估一次。
+- Training set: updates model parameters;
+- Validation set: selects the best model;
+- Test set: used once for the final evaluation.
 
-手势数据的主要风险是数据泄漏。如果训练集和验证集来自同一段连续录像，相邻帧几乎相同，验证准确率会虚高。
+The main risk in gesture datasets is data leakage. If training and validation sets contain adjacent frames from the same recording, the frames are nearly identical and validation accuracy becomes unrealistically high.
 
-正确做法是使用不同 session、背景或人员。
+Separate sessions, backgrounds, or participants should be used for validation.
 
-## 6. 数据增强
+## 6. Data Augmentation
 
-常见增强：
+Common augmentations include:
 
-- 随机裁剪；
-- 随机水平翻转；
-- 亮度变化；
-- 对比度变化；
-- 饱和度变化；
-- 轻微色相变化。
+- Random cropping;
+- Random horizontal flipping;
+- Brightness changes;
+- Contrast changes;
+- Saturation changes;
+- Small hue changes.
 
-增强可以模拟不同环境和手的位置。但水平翻转可能让某些方向性手势改变含义，需要根据手势定义决定是否使用。
+Augmentation simulates different environments and hand positions. Horizontal flipping may change the meaning of directional gestures and should be used according to the gesture definition.
 
-## 7. 迁移学习
+## 7. Transfer Learning
 
-从零训练一个图像模型需要大量数据。迁移学习先使用 ImageNet 预训练模型，再改成自己的类别。
+Training an image model from scratch requires a large dataset. Transfer learning starts from an ImageNet-pretrained model and replaces the output layer for the target classes.
 
-本项目：
+This project:
 
-1. 加载 MobileNetV3-Small；
-2. 保留前面的特征提取层；
-3. 把最后的分类层改成四类；
-4. 用少量手势图片训练。
+1. Loads MobileNetV3-Small;
+2. Keeps the pretrained feature extractor;
+3. Replaces the final classifier with four outputs;
+4. Trains on a relatively small gesture dataset.
 
-如果数据很少，可先冻结主干，只训练最后分类层：
+When data is limited, the backbone can be frozen with:
 
-```powershell
+~~~powershell
 --freeze-backbone
-```
+~~~
 
-数据增加后，可以解冻模型做完整微调。
+After collecting more data, the full model can be fine-tuned.
 
-## 8. MobileNetV3 是什么
+## 8. MobileNetV3
 
-MobileNetV3 是面向移动和边缘设备设计的轻量卷积网络。
+MobileNetV3 is a lightweight convolutional network designed for mobile and edge devices.
 
-优点：
+Advantages:
 
-- 参数量少；
-- 推理速度快；
-- 对 CPU 较友好；
-- 适合实时 Demo。
+- Small parameter count;
+- Fast inference;
+- Suitable for CPU execution;
+- Appropriate for real-time demonstration.
 
-缺点：
+Limitations:
 
-- 表达能力比大型模型弱；
-- 面对复杂背景时可能不稳定；
-- 需要高质量训练数据。
+- Lower representational capacity than large models;
+- Less stable under complex backgrounds;
+- Requires well-controlled training data.
 
-## 9. 分类输出和概率
+## 9. Classification Output and Probability
 
-模型输出 logits，经过 Softmax 后得到每个类别的概率：
+The model produces logits. A Softmax operation converts them into class probabilities:
 
-```text
+~~~text
 palm       0.08
 peace      0.91
 thumbs_up  0.01
 fist       0.00
-```
+~~~
 
-默认取概率最大的类别。置信度阈值用于过滤低质量预测。
+The class with the highest probability is selected by default. A confidence threshold rejects uncertain predictions.
 
-## 10. 为什么不能每一帧都按键
+## 10. Why Every Frame Must Not Send a Key
 
-实时视频每秒可以处理几十帧。假设模型在 1 秒内连续识别出 20 次剪刀手，如果每帧都发送 `right`，幻灯片会连续翻很多页。
+A real-time video pipeline can process dozens of frames per second. If the model recognizes a peace sign 20 times in one second and sends the right-arrow key each time, the presentation may advance by many slides.
 
-因此需要：
+The system therefore uses:
 
-### 连续帧
+### Stable Frames
 
-同一手势连续出现 5 帧才触发。
+The same gesture must appear for several consecutive frames.
 
-### 冷却时间
+### Cooldown
 
-同一个动作执行后，1.5 秒内不再重复执行。
+After an action is executed, the same action is blocked for a fixed period such as 1.5 seconds.
 
-### 置信度
+### Confidence
 
-低于 0.60 的预测不参与触发。
+Predictions below a threshold such as 0.60 do not participate in action triggering.
 
-## 11. 状态机思路
+## 11. State-Machine Logic
 
-本项目使用简化状态机：
+The project uses a simplified state machine:
 
-```text
-当前没有候选手势
-  -> 连续看到 peace
-  -> 计数增加
-  -> 达到稳定帧数
-  -> 检查冷却时间
-  -> 触发 next
-  -> 重置计数
-```
+~~~text
+No candidate gesture
+  -> peace is observed repeatedly
+  -> counter increases
+  -> stable-frame threshold is reached
+  -> cooldown is checked
+  -> next action is triggered
+  -> counter is reset
+~~~
 
-如果识别结果切换，候选手势会重新开始计数。
+If the predicted gesture changes, the candidate gesture and counter are restarted.
 
-## 12. 键盘控制
+## 12. Keyboard Control
 
-`pyautogui.press()` 可以把按键发送给当前前台窗口。
+The pyautogui library can send a key to the currently active window. For example, pyautogui.press("right") sends the right-arrow key.
 
-例如：
+This design has several implications:
 
-```python
-pyautogui.press("right")
-```
+- PowerPoint or the media player should be in the foreground;
+- If the camera window has focus, the key may not reach the presentation;
+- Important software should not be controlled without supervision;
+- Preview mode is safer by default.
 
-这意味着：
+## 13. Keyboard Control versus PowerPoint API
 
-- PPT 必须在最前面；
-- 如果焦点在摄像头窗口，按键可能不会进入 PPT；
-- 不要在没有监督时控制重要软件；
-- 默认预览模式更安全。
+Keyboard control is:
 
-## 13. 为什么使用键盘而不是 PowerPoint API
+- Compatible with PowerPoint, media players, and browsers;
+- Simple to implement;
+- Independent of Office plug-ins;
+- Suitable for rapid demonstration.
 
-键盘控制：
+Its limitations are:
 
-- 对 PPT、视频播放器和浏览器都通用；
-- 实现简单；
-- 不需要安装 Office 插件；
-- 适合快速 Demo。
+- It depends on the active foreground window;
+- Key mappings may differ between applications;
+- It cannot read the current slide number or playback state.
 
-限制：
+## 14. Model Checkpoints
 
-- 依赖当前前台窗口；
-- 按键映射可能因软件不同而不同；
-- 无法读取 PPT 当前页码或播放状态。
+Training produces:
 
-## 14. 模型保存
-
-训练后保存：
-
-```text
+~~~text
 runs/gesture_model/best.pt
-```
+~~~
 
-检查点中包含：
+The checkpoint contains:
 
-- 模型参数；
-- 类别顺序；
-- 输入图像尺寸；
-- 最佳验证指标。
+- Model parameters;
+- Class order;
+- Input image size;
+- Best validation metrics.
 
-推理时必须保持类别顺序一致，因此加载模型时直接读取检查点中的标签。
+The inference pipeline must preserve the same class order. The labels are therefore loaded directly from the checkpoint.
 
-## 15. 评价指标
+## 15. Evaluation Metrics
 
 ### Accuracy
 
-预测正确比例。
+The proportion of correct predictions.
 
 ### Macro F1
 
-每个类别 F1 的平均值，适合判断少数手势是否被忽略。
+The average F1 score across classes. It is useful for detecting whether a minority gesture class is being ignored.
 
-### 每类召回率
+### Per-Class Recall
 
-某手势中被正确识别的比例。
+The proportion of examples from a given gesture class that are correctly recognized.
 
-### 混淆矩阵
+### Confusion Matrix
 
-观察哪些手势容易混淆，例如：
+A table that shows which gestures are confused with one another, for example:
 
-- 剪刀手与手掌；
-- 握拳与点赞；
-- 手掌与背景。
+- Peace sign and open palm;
+- Fist and thumbs up;
+- Open palm and background.
 
 ### FPS
 
-每秒处理帧数。实时 Demo 的目标通常是 15 FPS 以上。
+Frames processed per second. Real-time demonstrations often target at least 15 FPS.
 
-## 16. 常见数据问题
+## 16. Common Data Problems
 
-- 背景太固定；
-- 同一 session 造成数据泄漏；
-- 手势类别不平衡；
-- 手离摄像头太远；
-- 图片模糊；
-- 某些手势连续帧几乎相同；
-- 训练数据没有覆盖左手和右手。
+- Backgrounds are too repetitive;
+- Training and validation frames come from the same session;
+- Gesture classes are imbalanced;
+- The hand is too far from the camera;
+- Images are blurred;
+- Consecutive frames are nearly identical;
+- Left and right hands are not both represented.
 
-## 17. 常见训练问题
+## 17. Common Training Problems
 
-### 验证准确率一直不提高
+### Validation Accuracy Does Not Improve
 
-- 增加数据；
-- 先冻结主干；
-- 检查标签是否放错；
-- 调整学习率；
-- 检查类别是否平衡。
+- Increase the dataset;
+- Freeze the backbone first;
+- Check for incorrect labels;
+- Adjust the learning rate;
+- Check class balance.
 
-### 训练准确率很高、验证很低
+### High Training Accuracy but Low Validation Accuracy
 
-- 数据泄漏风险；
-- 背景过拟合；
-- 数据太少；
-- 增强不足；
-- 验证集分布与训练集不同。
+- Possible data leakage;
+- Background overfitting;
+- Too little data;
+- Insufficient augmentation;
+- Different distributions between training and validation sets.
 
-### 实时预测不稳定
+### Unstable Real-Time Predictions
 
-- 提高稳定帧数；
-- 增加困难样本；
-- 调整 ROI；
-- 改善光照；
-- 不要只看单帧结果。
+- Increase the number of stable frames;
+- Add difficult examples;
+- Adjust the ROI;
+- Improve lighting;
+- Do not rely on a single-frame prediction.
 
-## 18. 项目代码阅读顺序
+## 18. Recommended Code Reading Order
 
-1. `config.py`：标签和动作配置；
-2. `data.py`：按文件夹读取图片；
-3. `model.py`：MobileNetV3 和图像变换；
-4. `train.py`：训练循环；
-5. `predictor.py`：单图与摄像头推理；
-6. `stability.py`：稳定帧与冷却时间；
-7. `actions.py`：动作映射和键盘控制；
-8. `camera.py`：采集和实时窗口；
-9. `cli.py`：所有命令入口。
+1. config.py: label and action configuration;
+2. data.py: folder-based image loading;
+3. model.py: MobileNetV3 and image transforms;
+4. train.py: training loop;
+5. predictor.py: single-image and camera inference;
+6. stability.py: stable frames and cooldown;
+7. actions.py: action mapping and keyboard control;
+8. camera.py: image capture and real-time window;
+9. cli.py: command-line entry points.
 
-## 19. 最小学习路线
+## 19. Minimal Learning Path
 
-1. Python 基础；
-2. NumPy 和图像读取；
-3. PyTorch Dataset 和 DataLoader；
-4. 迁移学习；
-5. OpenCV 摄像头；
-6. 状态机和防抖；
-7. 桌面自动化；
-8. 完成训练、预览和控制 Demo。
+1. Python fundamentals;
+2. NumPy and image loading;
+3. PyTorch Dataset and DataLoader;
+4. Transfer learning;
+5. OpenCV camera input;
+6. State machines and debouncing;
+7. Desktop automation;
+8. Training, preview, and controlled demonstration.

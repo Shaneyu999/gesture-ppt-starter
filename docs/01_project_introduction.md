@@ -1,175 +1,175 @@
-# 项目介绍与研究方法
+# Project Introduction and Research Method
 
-## 1. 项目名称
+## 1. Project Title
 
-**基于轻量视觉模型的实时手势人机交互系统**
+**A Lightweight Vision System for Real-Time Gesture-Based Human-Computer Interaction**
 
-Demo 场景：使用普通摄像头识别四种手势，并控制 PowerPoint 或视频播放器。
+Demonstration scenario: a normal webcam recognizes four hand gestures and controls PowerPoint or a video player.
 
-## 2. 研究背景
+## 2. Research Background
 
-演示文稿和视频播放通常需要鼠标、键盘或遥控器操作。摄像头手势交互可以减少设备依赖，使操作更自然，也可以用于无接触演示、公共展示和辅助交互。
+Presentations and video playback usually depend on a mouse, keyboard, or remote control. Camera-based gesture interaction reduces hardware dependence and can support touch-free presentations, public displays, and assistive interaction.
 
-与年龄组识别相比，手势识别具有更直观的视觉线索：
+Compared with age-group recognition, gesture recognition provides clearer visual cues:
 
-- 手指数量；
-- 手掌轮廓；
-- 拇指方向；
-- 手与身体的位置关系；
-- 连续动作变化。
+- Number of visible fingers;
+- Hand contour;
+- Thumb direction;
+- Relationship between the hand and body;
+- Changes across consecutive frames.
 
-因此它更适合作为图像分类和实时人机交互的入门项目。
+It is therefore a suitable entry point for studying image classification and real-time human-computer interaction.
 
-## 3. 研究任务
+## 3. Research Task
 
-输入是摄像头视频帧，输出是以下四种手势之一：
+The input is a webcam frame. The output is one of four gesture classes:
 
-| 标签 | 手势 | 默认动作 |
+| Label | Gesture | Default Action |
 | --- | --- | --- |
-| palm | 张开手掌 | 播放/暂停 |
-| peace | 剪刀手 | 下一张/快进 |
-| thumbs_up | 点赞 | 上一张/快退 |
-| fist | 握拳 | 静音 |
+| palm | Open palm | Play or pause |
+| peace | Peace sign | Next slide or forward |
+| thumbs_up | Thumbs up | Previous slide or rewind |
+| fist | Closed fist | Mute |
 
-系统进一步将识别结果映射为键盘操作。
+The system then maps the recognized gesture to a keyboard action.
 
-## 4. 系统结构
+## 4. System Architecture
 
-```text
-摄像头
-  -> 中央区域裁剪
-  -> MobileNetV3-Small 分类
-  -> 置信度过滤
-  -> 连续帧稳定判断
-  -> 冷却时间控制
-  -> 键盘动作映射
-  -> PPT/视频播放器
-```
+~~~text
+Camera
+  -> Center-region crop
+  -> MobileNetV3-Small classification
+  -> Confidence filtering
+  -> Stable-frame check
+  -> Cooldown control
+  -> Keyboard action mapping
+  -> PowerPoint or video player
+~~~
 
-## 5. 模型选择
+## 5. Model Selection
 
-项目使用 MobileNetV3-Small：
+The project uses MobileNetV3-Small:
 
-- 参数量较小；
-- CPU 推理速度较快；
-- ImageNet 预训练后适合迁移学习；
-- 修改最后的分类层即可用于四种手势。
+- Small parameter count;
+- Fast CPU inference;
+- Suitable for transfer learning from ImageNet;
+- The final classification layer can be replaced for four gesture classes.
 
-训练时可以选择：
+Training options include:
 
-- 冻结主干，只训练分类层；
-- 微调全部参数；
-- 类别加权损失；
-- 数据增强。
+- Freezing the backbone and training only the classifier;
+- Fine-tuning the full model;
+- Class-weighted loss;
+- Data augmentation.
 
-## 6. 数据采集
+## 6. Data Collection
 
-每种手势建议采集 100～300 张，训练集和验证集使用不同 session。
+A practical target is 100 to 300 images per gesture. Training and validation data should come from different sessions.
 
-需要覆盖：
+The dataset should cover:
 
-- 不同背景；
-- 不同光照；
-- 左手和右手；
-- 手与摄像头的距离变化；
-- 手势角度变化；
-- 不同人员和摄像头位置。
+- Different backgrounds;
+- Different lighting conditions;
+- Left and right hands;
+- Different hand-to-camera distances;
+- Different gesture orientations;
+- Different participants and camera positions.
 
-不允许把同一段连续录像的相邻帧随机分到训练集和验证集，因为这会造成数据泄漏，使验证效果虚高。
+Consecutive frames from one recording must not be randomly divided between training and validation. Such a split causes data leakage and inflates validation accuracy.
 
-## 7. 防误触设计
+## 7. False-Trigger Prevention
 
-如果模型每帧都发送按键，会出现大量重复操作。因此需要三个限制：
+If the model sends a key on every frame, a single gesture can create many repeated actions. Three constraints are used:
 
-1. **置信度阈值**：低置信度预测不触发；
-2. **连续帧数**：同一手势连续出现若干帧才触发；
-3. **冷却时间**：同一动作在短时间内只能执行一次。
+1. **Confidence threshold**: low-confidence predictions do not trigger an action;
+2. **Stable frames**: the same gesture must persist for several consecutive frames;
+3. **Cooldown**: the same action cannot be repeated within a short time window.
 
-这套逻辑放在 `stability.py` 中，可以独立测试，不依赖摄像头。
+This logic is implemented in stability.py and can be tested without a camera.
 
-## 8. 键盘控制设计
+## 8. Keyboard Control Design
 
-动作映射放在 `configs/actions.json`：
+Action mappings are stored in configs/actions.json:
 
-```json
+~~~json
 {
   "palm": { "action": "play_pause", "key": "space" },
   "peace": { "action": "next", "key": "right" },
   "thumbs_up": { "action": "previous", "key": "left" },
   "fist": { "action": "mute", "key": "m" }
 }
-```
+~~~
 
-实际发送按键需要显式添加 `--enable-controls`。默认只预览，避免程序误操作前台窗口。
+Keyboard events are sent only when the --enable-controls option is explicitly provided. The default mode is preview only, which reduces the risk of unintended actions in the foreground window.
 
-## 9. 实验设计
+## 9. Experimental Design
 
-### 实验一：基础分类
+### Experiment 1: Classification Baseline
 
-比较冻结主干和完整微调的准确率、Macro F1、训练时间和模型大小。
+Compare a frozen backbone with full fine-tuning using accuracy, Macro F1, training time, and model size.
 
-### 实验二：数据增强
+### Experiment 2: Data Augmentation
 
-比较不使用增强、随机裁剪、颜色扰动和翻转的效果。
+Compare no augmentation, random cropping, color perturbation, and horizontal flipping.
 
-### 实验三：背景影响
+### Experiment 3: Background Influence
 
-收集不同背景下的数据，测试模型是否依赖固定背景。
+Collect data under different backgrounds and test whether the model depends on a fixed background.
 
-### 实验四：光照与距离
+### Experiment 4: Lighting and Distance
 
-测试暗光、逆光、手距离变化和部分遮挡。
+Test low light, backlighting, changes in hand distance, and partial occlusion.
 
-### 实验五：防误触发参数
+### Experiment 5: False-Trigger Parameters
 
-比较不同稳定帧数、置信度阈值和冷却时间：
+Compare stable-frame counts, confidence thresholds, and cooldown periods using:
 
-- 误触发次数；
-- 漏触发次数；
-- 平均响应时间；
-- 连续操作成功率。
+- Number of false triggers;
+- Number of missed triggers;
+- Average response time;
+- Success rate for consecutive actions.
 
-### 实验六：实时性能
+### Experiment 6: Real-Time Performance
 
-测量：
+Measure:
 
-- 每帧推理时间；
-- FPS；
-- CPU 占用；
-- GPU 与 CPU 的差异；
-- ONNX 导出后的速度。
+- Inference time per frame;
+- FPS;
+- CPU usage;
+- Difference between GPU and CPU inference;
+- Speed after ONNX export.
 
-## 10. 评价指标
+## 10. Evaluation Metrics
 
-分类指标：
+Classification metrics:
 
-- Accuracy；
-- Macro F1；
-- 每类召回率；
-- 混淆矩阵。
+- Accuracy;
+- Macro F1;
+- Per-class recall;
+- Confusion matrix.
 
-交互指标：
+Interaction metrics:
 
-- 误触发次数；
-- 漏触发次数；
-- 从手势出现到动作执行的延迟；
-- 连续演示时操作成功率；
-- 实时 FPS。
+- Number of false triggers;
+- Number of missed triggers;
+- Delay from gesture appearance to action execution;
+- Success rate during continuous presentation control;
+- Real-time FPS.
 
-## 11. 预期成果
+## 11. Expected Outcomes
 
-- 一个可训练的四种手势分类模型；
-- 一个摄像头实时识别 Demo；
-- 一套手势到 PPT/视频按键的映射；
-- 一套稳定帧和冷却时间防误触机制；
-- 对背景、光照、距离和实时性能的实验分析；
-- 可提交 GitHub 的完整工程。
+- A trainable four-class gesture classifier;
+- A real-time webcam demonstration;
+- A gesture-to-key mapping for PowerPoint and video playback;
+- A stability and cooldown mechanism for preventing false triggers;
+- Experimental analysis of background, lighting, distance, and real-time performance;
+- A complete project suitable for release on GitHub.
 
-## 12. 后续扩展
+## 12. Future Extensions
 
-1. 使用手部关键点辅助分类；
-2. 使用时序模型识别挥手、画圈等动态手势；
-3. 加入手势组合和密码式操作；
-4. 增加无接触鼠标；
-5. 使用 ONNX Runtime 或 TensorRT 部署；
-6. 研究不同用户之间的个性化适配。
+1. Use hand landmarks as additional classification features;
+2. Apply temporal models to dynamic gestures such as waving or drawing circles;
+3. Support gesture combinations and password-like interaction;
+4. Add a touch-free mouse interface;
+5. Deploy with ONNX Runtime or TensorRT;
+6. Study personal adaptation across different users.

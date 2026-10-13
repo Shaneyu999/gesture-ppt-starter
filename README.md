@@ -64,6 +64,8 @@ gesture-ppt-starter/
 └── tests/
 ```
 
+The English documents are the primary versions. Chinese copies use the .zh-CN.md suffix.
+
 ## Requirements
 
 - Python 3.10 or later;

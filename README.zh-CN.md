@@ -63,6 +63,8 @@ gesture-ppt-starter/
 └── tests/
 ```
 
+文档以英文版为主，中文版本使用 .zh-CN.md 后缀。
+
 ## 环境要求
 
 - Python 3.10 或更高版本；
