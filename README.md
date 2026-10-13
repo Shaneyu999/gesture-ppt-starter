@@ -1,6 +1,6 @@
 # Gesture PPT Starter
 
-一个适合初学者的 **实时手势识别 + PPT/视频控制** Python 项目。
+一个 **实时手势识别 + PPT/视频控制** Python 项目。
 
 通过普通摄像头识别四种手势，并将手势转换为播放器或演示文稿的键盘操作：
 
@@ -365,13 +365,6 @@ python -m unittest discover -s tests -v
 - 让手占据画面中央更大区域；
 - 调整 `--roi`；
 - 避免训练集中某一手势总是出现在固定背景。
-
-## 学习和提交文档
-
-- [项目介绍与研究方法](docs/01_project_introduction.md)
-- [图像分类、迁移学习和实时推理基础](docs/02_basics.md)
-- [GitHub 提交教程](docs/03_github_guide.md)
-- [三分钟 Demo 演示教程](docs/04_demo_guide.md)
 
 ## 隐私和安全
 
